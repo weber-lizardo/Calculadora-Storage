@@ -25,9 +25,8 @@ de `data.js`. Para mudar o padrão para todos, edite o campo `preco` em `data.js
 
 ## Imagens
 
-As imagens das storages ficam em `img/` e são ilustrações em SVG de cada modelo
-(torre de 4 baias, rack 1U de 4 baias e rack 2U de 12 baias). Para usar a foto real,
-salve o arquivo em `img/` (ex.: `img/ts-433.jpg`) e altere o campo `imagem` do item em `data.js`.
+As fotos das storages ficam em `img/` (`ts-433.jpg`, `ts-435xeu.jpg`, `ts-1232pxu-rp.jpg`).
+Para trocar uma foto, substitua o arquivo ou altere o campo `imagem` do item em `data.js`.
 
 ## Publicação
 
