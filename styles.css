@@ -77,6 +77,15 @@ section + section { margin-top: 28px; }
 .cartao input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
 .cartao:has(input[type="radio"]:focus-visible) { outline: 3px solid var(--destaque); outline-offset: 2px; }
 
+.foto {
+  width: 100%; height: 120px; object-fit: contain;
+  background: var(--fundo); border-radius: 8px; padding: 8px;
+}
+.foto-resumo {
+  display: block; width: 100%; height: 110px; object-fit: contain;
+  background: var(--fundo); border-radius: 8px; padding: 6px; margin-bottom: 4px;
+}
+
 .cartao-topo { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
 .selo {
   flex-shrink: 0;

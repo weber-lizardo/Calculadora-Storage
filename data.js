@@ -1,10 +1,12 @@
 // Catálogo de produtos da calculadora.
 // Os preços são valores de referência (R$) e podem ser ajustados na própria página;
 // confira o valor atualizado no link de cada produto antes de fechar a compra.
+// `imagem` aponta para img/; troque por uma foto (.jpg/.png/.webp) com o mesmo caminho ou outro nome.
 
 const STORAGES = [
   {
     id: "ts-433",
+    imagem: "img/ts-433.svg",
     nome: "QNAP TS-433-4G",
     descricao: "Desktop · 4 baias · ARM Cortex-A55 4 núcleos · 4 GB DDR4 · 1x 2,5GbE + 1x GbE",
     baias: 4,
@@ -15,6 +17,7 @@ const STORAGES = [
   },
   {
     id: "ts-435xeu",
+    imagem: "img/ts-435xeu.svg",
     nome: "QNAP TS-435XeU-4G",
     descricao: "Rack 1U · 4 baias · Marvell 4 núcleos 2,2 GHz · 4 GB · 2x 2,5GbE · 2x 10GbE SFP+ · 2 fontes",
     baias: 4,
@@ -25,6 +28,7 @@ const STORAGES = [
   },
   {
     id: "ts-1232pxu-rp",
+    imagem: "img/ts-1232pxu-rp.svg",
     nome: "QNAP TS-1232PXU-RP-4G",
     descricao: "Rack 2U · 12 baias · Alpine AL-324 · 4 GB · 2x GbE · 2x 10GbE SFP+ · 2 fontes",
     baias: 12,

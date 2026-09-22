@@ -37,6 +37,7 @@
     el.className = "cartao" + (selecionado ? " ativo" : "");
     el.innerHTML = `
       <input type="radio" name="${grupo}" value="${item.id}" ${selecionado ? "checked" : ""} />
+      ${item.imagem ? `<img class="foto" src="${item.imagem}" alt="${item.nome}" loading="lazy" />` : ""}
       <span class="cartao-topo">
         <strong>${item.nome}</strong>
         <span class="selo">${detalhe}</span>
@@ -94,6 +95,7 @@
     const r = calcular(storage, disco, precoS, precoD);
 
     alvo.innerHTML = `
+      ${storage.imagem ? `<img class="foto-resumo" src="${storage.imagem}" alt="${storage.nome}" />` : ""}
       <h3>Custo de aquisição</h3>
       <dl>
         ${linha(storage.nome, moeda.format(precoS))}

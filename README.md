@@ -23,6 +23,12 @@ Os preços em `data.js` são **valores de referência**. Confira o preço atual 
 salvo no navegador (`localStorage`). O botão "Restaurar preços padrão" volta aos valores
 de `data.js`. Para mudar o padrão para todos, edite o campo `preco` em `data.js`.
 
+## Imagens
+
+As imagens das storages ficam em `img/` e são ilustrações em SVG de cada modelo
+(torre de 4 baias, rack 1U de 4 baias e rack 2U de 12 baias). Para usar a foto real,
+salve o arquivo em `img/` (ex.: `img/ts-433.jpg`) e altere o campo `imagem` do item em `data.js`.
+
 ## Publicação
 
 Por ser estático, dá para publicar com GitHub Pages
