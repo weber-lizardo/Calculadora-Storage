@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calculadora de Storage</title>
+  <meta name="description" content="Calcule o custo de aquisição de uma storage QNAP com discos e a capacidade útil em RAID 5 ou RAID 6." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topo">
+    <div class="container">
+      <h1>Calculadora de Storage</h1>
+      <p>Escolha a storage e o disco para ver o custo de aquisição e a capacidade útil após o RAID.</p>
+    </div>
+  </header>
+
+  <main class="container layout">
+    <div class="passos">
+      <section aria-labelledby="t-storage">
+        <h2 id="t-storage"><span class="num">1</span> Escolha a storage</h2>
+        <div id="lista-storages" class="grade" role="radiogroup" aria-labelledby="t-storage"></div>
+      </section>
+
+      <section aria-labelledby="t-disco">
+        <h2 id="t-disco"><span class="num">2</span> Escolha o disco</h2>
+        <p class="dica" id="dica-disco">O disco escolhido é multiplicado pela quantidade de baias da storage.</p>
+        <div id="lista-discos" class="grade" role="radiogroup" aria-labelledby="t-disco"></div>
+      </section>
+
+      <p class="aviso">
+        Os preços são valores de referência e podem ser editados em cada item.
+        As alterações ficam salvas neste navegador.
+        <button type="button" id="restaurar" class="link">Restaurar preços padrão</button>
+      </p>
+    </div>
+
+    <aside class="resumo" aria-live="polite">
+      <h2>Resumo</h2>
+      <div id="resumo-conteudo">
+        <p class="vazio">Selecione uma storage e um disco para ver o cálculo.</p>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="container rodape">
+    Capacidades em TB decimais (1 TB = 10¹² bytes), como informado pelos fabricantes. O sistema
+    operacional exibe em TiB, por isso o valor aparece menor. Não considera o espaço reservado pelo QTS.
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
