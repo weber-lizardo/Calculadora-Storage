@@ -35,11 +35,13 @@ As colunas de item usam o `id` de cada produto em `data.js`, com `_` no lugar de
 1. Crie um projeto em [supabase.com](https://supabase.com) (o plano gratuito basta).
 2. Em **SQL Editor → New query**, cole o conteúdo de [`supabase.sql`](supabase.sql) e
    clique em **Run**. Isso cria a tabela `pedidos` e a política de segurança.
-3. Em **Project Settings → API**, copie a **Project URL** e a chave **anon public** e
-   coloque-as em `SUPABASE_URL` e `SUPABASE_ANON_KEY`, no `data.js`.
+3. Em **Project Settings → API Keys**, copie a **Publishable key** e coloque-a em
+   `SUPABASE_KEY`, no `data.js`, junto com a URL do projeto em `SUPABASE_URL`.
 
-A chave anon é pública por natureza e pode ficar no site: a política da tabela só permite
-**inserir** pedidos. Ninguém consegue ler, alterar ou apagar pedidos com ela. Para ver os
+A Publishable key é pública por natureza e pode ficar no site: a política da tabela só
+permite **inserir** pedidos. Ninguém consegue ler, alterar ou apagar pedidos com ela.
+**Nunca use a Secret key no site**: ela ignora as políticas e dá acesso total ao banco.
+Para ver os
 pedidos, use o **Table Editor** do Supabase, que também exporta a tabela em CSV (abre no
 Excel).
 

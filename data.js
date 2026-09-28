@@ -4,11 +4,12 @@
 // `imagem` aponta para a foto do produto em img/.
 
 // Projeto Supabase que recebe os pedidos (tabela `pedidos`, criada por supabase.sql).
-// Use a URL do projeto e a chave pública "anon" (Settings → API). A chave anon pode ficar
-// no site: a política da tabela só permite inserir pedidos, não ler nem alterar.
+// Use a URL do projeto e a chave pública "Publishable key" (Settings → API Keys). Ela pode
+// ficar no site: a política da tabela só permite inserir pedidos, não ler nem alterar.
+// NUNCA coloque aqui a Secret key: ela ignora as políticas e dá acesso total ao banco.
 // Vazios: o site baixa a planilha pedidos-orcamento.xlsx localmente.
-const SUPABASE_URL = "";
-const SUPABASE_ANON_KEY = "";
+const SUPABASE_URL = "https://ifsvfmtynuingkmgkbka.supabase.co";
+const SUPABASE_KEY = "sb_publishable_IJeenrb-73hW5lHkQYLg2g_8wUqfXSH";
 
 // Locais que podem pedir o orçamento, em ordem alfabética.
 const LOCAIS = [
@@ -135,5 +136,5 @@ function calcular(storage, disco, precoStorage = storage.preco, precoDisco = dis
 }
 
 if (typeof module !== "undefined") {
-  module.exports = { SUPABASE_URL, SUPABASE_ANON_KEY, LOCAIS, STORAGES, DISCOS, calcular };
+  module.exports = { SUPABASE_URL, SUPABASE_KEY, LOCAIS, STORAGES, DISCOS, calcular };
 }
