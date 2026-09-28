@@ -3,6 +3,12 @@
 // confira o valor atualizado no link de cada produto antes de fechar a compra.
 // `imagem` aponta para a foto do produto em img/.
 
+// Locais que podem pedir o orçamento, em ordem alfabética.
+const LOCAIS = [
+  "USeB", "ADRA-ES", "ADRA-RJ", "ADRA-MG", "AES", "ASES", "EDESSA", "IPAE", "FADMINAS",
+  "NET", "AMC", "AML", "AMS", "MMN", "MMO", "ARC", "ARF", "ARS",
+].sort((a, b) => a.localeCompare(b, "pt-BR", { sensitivity: "base" }));
+
 const STORAGES = [
   {
     id: "ts-433",
@@ -122,5 +128,5 @@ function calcular(storage, disco, precoStorage = storage.preco, precoDisco = dis
 }
 
 if (typeof module !== "undefined") {
-  module.exports = { STORAGES, DISCOS, calcular };
+  module.exports = { LOCAIS, STORAGES, DISCOS, calcular };
 }

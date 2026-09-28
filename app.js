@@ -1,30 +1,41 @@
 (function () {
   const CHAVE_PRECOS = "calculadora-storage:precos";
+  const CHAVE_PEDIDOS = "calculadora-storage:pedidos";
+  const ARQUIVO_PEDIDOS = "pedidos-orcamento.xlsx";
+  const COL_LOCAL = "Local";
+  const COL_DATA = "Data";
 
   const moeda = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
   const numero = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 });
   const pct = new Intl.NumberFormat("pt-BR", { style: "percent", maximumFractionDigits: 1 });
 
   const estado = {
+    local: "",
     storageId: null,
     discoId: null,
-    precos: carregarPrecos(),
+    precos: carregar(CHAVE_PRECOS, {}),
+    // Cada pedido é um objeto { Local, <nome do item>: quantidade, ..., Data }.
+    pedidos: carregar(CHAVE_PEDIDOS, []),
   };
 
-  function carregarPrecos() {
+  function carregar(chave, padrao) {
     try {
-      return JSON.parse(localStorage.getItem(CHAVE_PRECOS)) || {};
+      return JSON.parse(localStorage.getItem(chave)) || padrao;
     } catch (e) {
-      return {};
+      return padrao;
+    }
+  }
+
+  function salvar(chave, valor) {
+    try {
+      localStorage.setItem(chave, JSON.stringify(valor));
+    } catch (e) {
+      // Sem armazenamento disponível: os dados valem só para esta sessão.
     }
   }
 
   function salvarPrecos() {
-    try {
-      localStorage.setItem(CHAVE_PRECOS, JSON.stringify(estado.precos));
-    } catch (e) {
-      // Sem armazenamento disponível: os preços valem só para esta sessão.
-    }
+    salvar(CHAVE_PRECOS, estado.precos);
   }
 
   function precoDe(item) {
@@ -129,8 +140,117 @@
     renderizarResumo();
   }
 
+  function renderizarLocais() {
+    const seletor = document.getElementById("local");
+    seletor.append(...LOCAIS.map((l) => new Option(l, l)));
+  }
+
+  // ---- Pedido do orçamento (planilha Excel) ----
+
+  function status(texto, erro = false) {
+    const el = document.getElementById("pedido-status");
+    el.textContent = texto;
+    el.classList.toggle("erro", erro);
+  }
+
+  function totalPedidos() {
+    const n = estado.pedidos.length;
+    return `${n} ${n === 1 ? "pedido" : "pedidos"} na planilha.`;
+  }
+
+  // Colunas fixas: Local, um item do catálogo por coluna e a data.
+  // Colunas extras vindas de uma planilha importada são mantidas antes da data.
+  function colunas() {
+    const itens = [...STORAGES, ...DISCOS].map((i) => i.nome);
+    const extras = [];
+    for (const p of estado.pedidos) {
+      for (const k of Object.keys(p)) {
+        if (k !== COL_LOCAL && k !== COL_DATA && !itens.includes(k) && !extras.includes(k)) {
+          extras.push(k);
+        }
+      }
+    }
+    return [COL_LOCAL, ...itens, ...extras, COL_DATA];
+  }
+
+  function baixarPlanilha() {
+    const cab = colunas();
+    const linhas = estado.pedidos.map((p) => cab.map((c) => p[c] ?? ""));
+    const aba = XLSX.utils.aoa_to_sheet([cab, ...linhas]);
+    aba["!cols"] = cab.map((c) => ({ wch: Math.max(8, c.length + 2) }));
+    const livro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(livro, aba, "Pedidos");
+    XLSX.writeFile(livro, ARQUIVO_PEDIDOS);
+  }
+
+  function gerarPedido() {
+    if (typeof XLSX === "undefined") {
+      status("Não foi possível carregar o gerador de planilhas.", true);
+      return;
+    }
+    const storage = STORAGES.find((s) => s.id === estado.storageId);
+    const disco = DISCOS.find((d) => d.id === estado.discoId);
+    const faltando = [
+      !estado.local && "o local",
+      !storage && "a storage",
+      !disco && "o disco",
+    ].filter(Boolean);
+    if (faltando.length) {
+      status(`Selecione ${faltando.join(", ").replace(/, ([^,]*)$/, " e $1")} antes de gerar o pedido.`, true);
+      return;
+    }
+
+    const pedido = { [COL_LOCAL]: estado.local };
+    pedido[storage.nome] = 1;
+    pedido[disco.nome] = calcular(storage, disco).quantidade;
+    pedido[COL_DATA] = new Date().toLocaleString("pt-BR");
+
+    estado.pedidos.push(pedido);
+    salvar(CHAVE_PEDIDOS, estado.pedidos);
+    baixarPlanilha();
+    status(`Pedido de ${estado.local} adicionado. ${totalPedidos()}`);
+  }
+
+  function importarPlanilha(arquivo) {
+    if (typeof XLSX === "undefined") {
+      status("Não foi possível carregar o gerador de planilhas.", true);
+      return;
+    }
+    arquivo.arrayBuffer().then((dados) => {
+      const livro = XLSX.read(dados);
+      const aba = livro.Sheets[livro.SheetNames[0]];
+      const linhas = XLSX.utils.sheet_to_json(aba, { defval: "" }).filter((l) => l[COL_LOCAL] !== "");
+      if (estado.pedidos.length && !confirm(
+        `Substituir os ${estado.pedidos.length} pedidos deste navegador pelos ${linhas.length} da planilha?`
+      )) return;
+      estado.pedidos = linhas;
+      salvar(CHAVE_PEDIDOS, estado.pedidos);
+      status(`Planilha carregada. ${totalPedidos()} Os próximos pedidos serão acrescentados a ela.`);
+    }).catch(() => status("Não foi possível ler a planilha escolhida.", true));
+  }
+
+  document.getElementById("gerar-pedido").addEventListener("click", gerarPedido);
+
+  document.getElementById("importar").addEventListener("change", (ev) => {
+    const arquivo = ev.target.files[0];
+    if (arquivo) importarPlanilha(arquivo);
+    ev.target.value = "";
+  });
+
+  document.getElementById("limpar-pedidos").addEventListener("click", () => {
+    if (!estado.pedidos.length) return status("Não há pedidos para limpar.");
+    if (!confirm(`Apagar os ${estado.pedidos.length} pedidos salvos neste navegador?`)) return;
+    estado.pedidos = [];
+    salvar(CHAVE_PEDIDOS, estado.pedidos);
+    status("Pedidos apagados. O próximo pedido começa uma planilha nova.");
+  });
+
   document.addEventListener("change", (ev) => {
     const t = ev.target;
+    if (t.id === "local") {
+      estado.local = t.value;
+      return;
+    }
     if (t.name === "storage") estado.storageId = t.value;
     else if (t.name === "disco") estado.discoId = t.value;
     else return;
@@ -154,5 +274,7 @@
     atualizar();
   });
 
+  renderizarLocais();
   atualizar();
+  if (estado.pedidos.length) status(totalPedidos());
 })();

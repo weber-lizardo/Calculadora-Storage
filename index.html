@@ -17,13 +17,20 @@
 
   <main class="container layout">
     <div class="passos">
+      <section aria-labelledby="t-local">
+        <h2 id="t-local"><span class="num">1</span> Escolha o local do orçamento</h2>
+        <select id="local" class="seletor" aria-labelledby="t-local">
+          <option value="">Selecione o local…</option>
+        </select>
+      </section>
+
       <section aria-labelledby="t-storage">
-        <h2 id="t-storage"><span class="num">1</span> Escolha a storage</h2>
+        <h2 id="t-storage"><span class="num">2</span> Escolha a storage</h2>
         <div id="lista-storages" class="grade" role="radiogroup" aria-labelledby="t-storage"></div>
       </section>
 
       <section aria-labelledby="t-disco">
-        <h2 id="t-disco"><span class="num">2</span> Escolha o disco</h2>
+        <h2 id="t-disco"><span class="num">3</span> Escolha o disco</h2>
         <p class="dica" id="dica-disco">O disco escolhido é multiplicado pela quantidade de baias da storage.</p>
         <div id="lista-discos" class="grade" role="radiogroup" aria-labelledby="t-disco"></div>
       </section>
@@ -40,6 +47,23 @@
       <div id="resumo-conteudo">
         <p class="vazio">Selecione uma storage e um disco para ver o cálculo.</p>
       </div>
+
+      <div class="pedido">
+        <button type="button" id="gerar-pedido" class="botao">Gerar pedido do orçamento</button>
+        <p id="pedido-status" class="pedido-status" role="status"></p>
+        <p class="pedido-info">
+          Cada pedido acrescenta uma linha na planilha <code>pedidos-orcamento.xlsx</code>, que é
+          baixada com todos os pedidos gerados neste navegador.
+        </p>
+        <p class="pedido-acoes">
+          <label class="link">
+            Continuar uma planilha existente
+            <input type="file" id="importar" accept=".xlsx,.xls,.csv" hidden />
+          </label>
+          ·
+          <button type="button" id="limpar-pedidos" class="link">Limpar pedidos</button>
+        </p>
+      </div>
     </aside>
   </main>
 
@@ -48,6 +72,7 @@
     operacional exibe em TiB, por isso o valor aparece menor. Não considera o espaço reservado pelo QTS.
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="data.js"></script>
   <script src="app.js"></script>
 </body>
