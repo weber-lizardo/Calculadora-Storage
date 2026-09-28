@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Pedidos · Administração</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topo">
+    <div class="container">
+      <h1>Pedidos do orçamento</h1>
+      <p>Área administrativa: acesso restrito aos administradores cadastrados no Supabase.</p>
+    </div>
+  </header>
+
+  <main class="container admin">
+    <form id="form-login" class="painel login" hidden>
+      <h2>Entrar</h2>
+      <label>E-mail
+        <input type="email" id="email" class="campo" autocomplete="username" required />
+      </label>
+      <label>Senha
+        <input type="password" id="senha" class="campo" autocomplete="current-password" required />
+      </label>
+      <button type="submit" class="botao">Entrar</button>
+      <p id="login-status" class="pedido-status erro" role="status"></p>
+    </form>
+
+    <section id="area-pedidos" hidden>
+      <div class="barra">
+        <span id="contagem" class="contagem"></span>
+        <button type="button" id="atualizar" class="botao botao-sec">Atualizar</button>
+        <button type="button" id="excluir" class="botao botao-perigo" disabled>Excluir selecionados</button>
+        <button type="button" id="sair" class="link">Sair</button>
+      </div>
+      <p id="admin-status" class="pedido-status" role="status"></p>
+
+      <div class="tabela-rolagem">
+        <table class="tabela">
+          <thead id="tabela-cabecalho"></thead>
+          <tbody id="tabela-corpo"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

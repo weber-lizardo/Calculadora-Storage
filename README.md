@@ -41,7 +41,15 @@ As colunas de item usam o `id` de cada produto em `data.js`, com `_` no lugar de
 A Publishable key é pública por natureza e pode ficar no site: a política da tabela só
 permite **inserir** pedidos. Ninguém consegue ler, alterar ou apagar pedidos com ela.
 **Nunca use a Secret key no site**: ela ignora as políticas e dá acesso total ao banco.
-Para ver os pedidos, use o **Table Editor** do Supabase.
+Para ver os pedidos, use o **Table Editor** do Supabase ou a página administrativa abaixo.
+
+### Página administrativa (`admin.html`)
+
+Lista os pedidos da tabela e permite marcar linhas (ou todas) e excluí-las. A página não é
+linkada no site e não é indexada por buscadores, mas o que protege os dados é o login:
+só quem entra com um usuário do Supabase Auth cadastrado em `administradores` consegue
+ler ou apagar pedidos. Para configurar, siga os passos no fim de [`supabase.sql`](supabase.sql)
+(criar o usuário, desativar novos cadastros e cadastrar o administrador).
 
 **Ao adicionar um produto em `data.js`**, crie também a coluna dele na tabela, por exemplo:
 
