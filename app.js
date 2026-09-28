@@ -183,27 +183,41 @@
     XLSX.writeFile(livro, ARQUIVO_PEDIDOS);
   }
 
-  // Envia o pedido ao fluxo do Power Automate, que acrescenta a linha na planilha do SharePoint.
-  function enviarPedido(pedido) {
+  // Coluna do item na tabela `pedidos` do Supabase: o id com "_" no lugar de "-".
+  function colunaBanco(item) {
+    return item.id.replace(/-/g, "_");
+  }
+
+  // Grava o pedido na tabela `pedidos` do Supabase (API REST, sem biblioteca).
+  function enviarPedido(storage, disco) {
     const botao = document.getElementById("gerar-pedido");
     botao.disabled = true;
     status("Enviando pedido…");
-    const linha = Object.fromEntries(colunas().map((c) => [c, pedido[c] ?? ""]));
-    fetch(PEDIDOS_URL, {
+    const linha = {
+      local: estado.local,
+      [colunaBanco(storage)]: 1,
+      [colunaBanco(disco)]: calcular(storage, disco).quantidade,
+    };
+    fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
       body: JSON.stringify(linha),
     })
       .then((r) => {
         if (!r.ok) throw new Error(r.status);
-        status(`Pedido de ${pedido[COL_LOCAL]} registrado na planilha.`);
+        status(`Pedido de ${linha.local} registrado.`);
       })
-      .catch(() => status("Não foi possível registrar o pedido na planilha. Tente novamente.", true))
+      .catch(() => status("Não foi possível registrar o pedido. Tente novamente.", true))
       .finally(() => { botao.disabled = false; });
   }
 
   function gerarPedido() {
-    if (!PEDIDOS_URL && typeof XLSX === "undefined") {
+    if (!SUPABASE_URL && typeof XLSX === "undefined") {
       status("Não foi possível carregar o gerador de planilhas.", true);
       return;
     }
@@ -219,12 +233,12 @@
       return;
     }
 
+    if (SUPABASE_URL) return enviarPedido(storage, disco);
+
     const pedido = { [COL_LOCAL]: estado.local };
     pedido[storage.nome] = 1;
     pedido[disco.nome] = calcular(storage, disco).quantidade;
     pedido[COL_DATA] = new Date().toLocaleString("pt-BR");
-
-    if (PEDIDOS_URL) return enviarPedido(pedido);
 
     estado.pedidos.push(pedido);
     salvar(CHAVE_PEDIDOS, estado.pedidos);
@@ -297,8 +311,8 @@
 
   renderizarLocais();
   atualizar();
-  if (PEDIDOS_URL) {
-    // Com a planilha online, o histórico local e a importação não são usados.
+  if (SUPABASE_URL) {
+    // Com o banco de dados, o histórico local e a importação de planilha não são usados.
     document.querySelectorAll(".pedido-info, .pedido-acoes").forEach((el) => el.remove());
   } else if (estado.pedidos.length) {
     status(totalPedidos());

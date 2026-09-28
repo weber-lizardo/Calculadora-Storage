@@ -18,61 +18,44 @@ Abra `index.html` no navegador (não precisa de servidor nem de build).
    - o aproveitamento e o custo por TB útil.
 5. Clique em **Gerar pedido do orçamento**.
 
-## Pedidos do orçamento (Excel)
+## Pedidos do orçamento (Supabase)
 
-Cada clique em "Gerar pedido do orçamento" acrescenta uma linha e baixa a planilha
-`pedidos-orcamento.xlsx` com todos os pedidos já gerados:
+Cada clique em "Gerar pedido do orçamento" grava uma linha na tabela `pedidos` de um
+projeto [Supabase](https://supabase.com): o local escolhido e, em cada coluna de item, a
+quantidade pedida (1 storage e um disco por baia).
 
-| Local | QNAP TS-433-4G | … | HD Seagate IronWolf Pro 8 TB | … | Data |
-|-------|----------------|---|------------------------------|---|------|
-| ADRA-ES | 1 | | 4 | | 28/09/2026, 10:15:00 |
+| criado_em | local | ts_433 | … | st8000nt001 | … |
+|-----------|-------|--------|---|-------------|---|
+| 2026-09-28 10:15 | ADRA-ES | 1 | | 4 | |
 
-- A primeira coluna é o local escolhido.
-- Há uma coluna para cada item do catálogo; a linha traz a quantidade de cada item
-  escolhido (1 storage e um disco por baia).
+As colunas de item usam o `id` de cada produto em `data.js`, com `_` no lugar de `-`.
 
-Como o site é estático, os pedidos ficam guardados no navegador (`localStorage`) e a
-planilha é baixada de novo, completa, a cada pedido. Para continuar uma planilha em outro
-computador ou navegador, use "Continuar uma planilha existente" e escolha o `.xlsx`: os
-próximos pedidos são acrescentados a ela. "Limpar pedidos" começa uma planilha nova.
-A geração da planilha usa a biblioteca [SheetJS](https://sheetjs.com/), carregada por CDN.
+### Configuração
 
-### Gravar direto na planilha do SharePoint
+1. Crie um projeto em [supabase.com](https://supabase.com) (o plano gratuito basta).
+2. Em **SQL Editor → New query**, cole o conteúdo de [`supabase.sql`](supabase.sql) e
+   clique em **Run**. Isso cria a tabela `pedidos` e a política de segurança.
+3. Em **Project Settings → API**, copie a **Project URL** e a chave **anon public** e
+   coloque-as em `SUPABASE_URL` e `SUPABASE_ANON_KEY`, no `data.js`.
 
-O site não consegue editar a planilha pelo link de compartilhamento: a API da Microsoft
-sempre exige autenticação. Quem faz a ponte é um fluxo do Power Automate, que roda com a
-conta de quem o criou; os usuários do site não precisam fazer login.
+A chave anon é pública por natureza e pode ficar no site: a política da tabela só permite
+**inserir** pedidos. Ninguém consegue ler, alterar ou apagar pedidos com ela. Para ver os
+pedidos, use o **Table Editor** do Supabase, que também exporta a tabela em CSV (abre no
+Excel).
 
-1. **Prepare a planilha.** Na célula A1, cole a linha de cabeçalhos abaixo (separada por
-   tabulação), selecione-a e use **Inserir → Tabela** (marque "Minha tabela tem
-   cabeçalhos"). Em **Design da Tabela**, dê o nome `Pedidos` à tabela.
+**Ao adicionar um produto em `data.js`**, crie também a coluna dele na tabela, por exemplo:
 
-   ```
-   Local	QNAP TS-433-4G	QNAP TS-435XeU-4G	QNAP TS-1232PXU-RP-4G	SSD Kingston DC600M 7,68 TB	HD Seagate IronWolf Pro 4 TB	HD Seagate IronWolf Pro 8 TB	HD Seagate IronWolf Pro 12 TB	HD Seagate IronWolf Pro 16 TB	HD Seagate IronWolf Pro 20 TB	HD Seagate IronWolf Pro 28 TB	Data
-   ```
+```sql
+alter table public.pedidos add column st24000nt002 integer check (st24000nt002 >= 0);
+```
 
-2. **Crie o fluxo** em [make.powerautomate.com](https://make.powerautomate.com) → Criar →
-   Fluxo da nuvem instantâneo:
-   - Gatilho **Quando uma solicitação HTTP é recebida** (conector Premium). Em "Quem pode
-     disparar o fluxo", escolha **Qualquer pessoa**. Em "Esquema JSON do corpo da
-     solicitação", use "Usar conteúdo de amostra" e cole:
+### Sem Supabase
 
-     ```json
-     {"Local":"AES","QNAP TS-433-4G":1,"QNAP TS-435XeU-4G":"","QNAP TS-1232PXU-RP-4G":"","SSD Kingston DC600M 7,68 TB":"","HD Seagate IronWolf Pro 4 TB":4,"HD Seagate IronWolf Pro 8 TB":"","HD Seagate IronWolf Pro 12 TB":"","HD Seagate IronWolf Pro 16 TB":"","HD Seagate IronWolf Pro 20 TB":"","HD Seagate IronWolf Pro 28 TB":"","Data":"28/09/2026, 10:15:00"}
-     ```
-
-   - Ação **Excel Online (Business) → Adicionar uma linha a uma tabela**: escolha o site
-     SAD-USeB/TI, o arquivo e a tabela `Pedidos`, e preencha cada coluna com o campo de
-     mesmo nome do gatilho.
-   - Ação **Resposta** com código de status `200`.
-
-3. **Salve o fluxo**, copie a URL gerada no gatilho HTTP e coloque em `PEDIDOS_URL`, no
-   `data.js`.
-
-Com `PEDIDOS_URL` preenchido, cada clique em "Gerar pedido do orçamento" acrescenta uma
-linha na planilha do SharePoint. Com `PEDIDOS_URL` vazio, o site volta a baixar o
-`pedidos-orcamento.xlsx` localmente. A URL do fluxo fica visível no código do site: quem
-a tiver consegue inserir linhas, mas não consegue ler nem apagar a planilha.
+Com `SUPABASE_URL` vazio, o site guarda os pedidos no navegador (`localStorage`) e, a cada
+pedido, baixa a planilha `pedidos-orcamento.xlsx` completa, com a coluna `Local`, uma
+coluna por item e a data. "Continuar uma planilha existente" carrega um `.xlsx` para
+acrescentar novos pedidos a ele, e "Limpar pedidos" começa uma planilha nova. A planilha é
+gerada pela biblioteca [SheetJS](https://sheetjs.com/), carregada por CDN.
 
 ## Preços
 

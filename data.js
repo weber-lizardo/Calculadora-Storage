@@ -3,9 +3,12 @@
 // confira o valor atualizado no link de cada produto antes de fechar a compra.
 // `imagem` aponta para a foto do produto em img/.
 
-// Endereço do fluxo do Power Automate que acrescenta cada pedido na planilha do SharePoint
-// (gatilho "Quando uma solicitação HTTP é recebida"). Vazio: o site baixa a planilha localmente.
-const PEDIDOS_URL = "";
+// Projeto Supabase que recebe os pedidos (tabela `pedidos`, criada por supabase.sql).
+// Use a URL do projeto e a chave pública "anon" (Settings → API). A chave anon pode ficar
+// no site: a política da tabela só permite inserir pedidos, não ler nem alterar.
+// Vazios: o site baixa a planilha pedidos-orcamento.xlsx localmente.
+const SUPABASE_URL = "";
+const SUPABASE_ANON_KEY = "";
 
 // Locais que podem pedir o orçamento, em ordem alfabética.
 const LOCAIS = [
@@ -132,5 +135,5 @@ function calcular(storage, disco, precoStorage = storage.preco, precoDisco = dis
 }
 
 if (typeof module !== "undefined") {
-  module.exports = { PEDIDOS_URL, LOCAIS, STORAGES, DISCOS, calcular };
+  module.exports = { SUPABASE_URL, SUPABASE_ANON_KEY, LOCAIS, STORAGES, DISCOS, calcular };
 }
