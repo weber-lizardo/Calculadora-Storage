@@ -7,7 +7,6 @@
 // Use a URL do projeto e a chave pública "Publishable key" (Settings → API Keys). Ela pode
 // ficar no site: a política da tabela só permite inserir pedidos, não ler nem alterar.
 // NUNCA coloque aqui a Secret key: ela ignora as políticas e dá acesso total ao banco.
-// Vazios: o site baixa a planilha pedidos-orcamento.xlsx localmente.
 const SUPABASE_URL = "https://ifsvfmtynuingkmgkbka.supabase.co";
 const SUPABASE_KEY = "sb_publishable_IJeenrb-73hW5lHkQYLg2g_8wUqfXSH";
 

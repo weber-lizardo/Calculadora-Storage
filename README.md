@@ -41,23 +41,13 @@ As colunas de item usam o `id` de cada produto em `data.js`, com `_` no lugar de
 A Publishable key é pública por natureza e pode ficar no site: a política da tabela só
 permite **inserir** pedidos. Ninguém consegue ler, alterar ou apagar pedidos com ela.
 **Nunca use a Secret key no site**: ela ignora as políticas e dá acesso total ao banco.
-Para ver os
-pedidos, use o **Table Editor** do Supabase, que também exporta a tabela em CSV (abre no
-Excel).
+Para ver os pedidos, use o **Table Editor** do Supabase.
 
 **Ao adicionar um produto em `data.js`**, crie também a coluna dele na tabela, por exemplo:
 
 ```sql
 alter table public.pedidos add column st24000nt002 integer check (st24000nt002 >= 0);
 ```
-
-### Sem Supabase
-
-Com `SUPABASE_URL` vazio, o site guarda os pedidos no navegador (`localStorage`) e, a cada
-pedido, baixa a planilha `pedidos-orcamento.xlsx` completa, com a coluna `Local`, uma
-coluna por item e a data. "Continuar uma planilha existente" carrega um `.xlsx` para
-acrescentar novos pedidos a ele, e "Limpar pedidos" começa uma planilha nova. A planilha é
-gerada pela biblioteca [SheetJS](https://sheetjs.com/), carregada por CDN.
 
 ## Preços
 

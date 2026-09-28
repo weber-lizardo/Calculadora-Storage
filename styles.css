@@ -158,7 +158,6 @@ section + section { margin-top: 28px; }
 .pedido-status { font-size: 0.88rem; font-weight: 600; margin: 10px 0 0; }
 .pedido-status:empty { display: none; }
 .pedido-status.erro { color: #d33a2c; }
-.pedido-info, .pedido-acoes { font-size: 0.8rem; color: var(--suave); margin: 10px 0 0; }
 
 .rodape { font-size: 0.8rem; color: var(--suave); padding-bottom: 32px; }
 

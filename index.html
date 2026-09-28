@@ -51,18 +51,6 @@
       <div class="pedido">
         <button type="button" id="gerar-pedido" class="botao">Gerar pedido do orçamento</button>
         <p id="pedido-status" class="pedido-status" role="status"></p>
-        <p class="pedido-info">
-          Cada pedido acrescenta uma linha na planilha <code>pedidos-orcamento.xlsx</code>, que é
-          baixada com todos os pedidos gerados neste navegador.
-        </p>
-        <p class="pedido-acoes">
-          <label class="link">
-            Continuar uma planilha existente
-            <input type="file" id="importar" accept=".xlsx,.xls,.csv" hidden />
-          </label>
-          ·
-          <button type="button" id="limpar-pedidos" class="link">Limpar pedidos</button>
-        </p>
       </div>
     </aside>
   </main>
@@ -72,7 +60,6 @@
     operacional exibe em TiB, por isso o valor aparece menor. Não considera o espaço reservado pelo QTS.
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="data.js"></script>
   <script src="app.js"></script>
 </body>
