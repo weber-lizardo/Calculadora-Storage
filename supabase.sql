@@ -36,3 +36,52 @@ create policy "Site pode inserir pedidos"
   with check (true);
 
 grant insert on public.pedidos to anon;
+
+-- ---------------------------------------------------------------------------
+-- Página administrativa (admin.html): listar e excluir pedidos.
+--
+-- Só usuários logados (Supabase Auth) e cadastrados em `administradores` podem ler e
+-- apagar pedidos. A chave pública sozinha continua podendo apenas inserir.
+--
+-- Depois de rodar este arquivo:
+--   1. Authentication → Users → Add user: crie o usuário do administrador (e-mail e senha).
+--   2. Authentication → Sign In / Providers: desative "Allow new users to sign up".
+--   3. Cadastre o administrador (troque o e-mail):
+--        insert into public.administradores (user_id)
+--        select id from auth.users where email = 'admin@exemplo.com';
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.administradores (
+  user_id uuid primary key references auth.users (id) on delete cascade
+);
+
+-- Sem políticas: ninguém lê ou altera esta tabela pelo site, só pelo painel do Supabase.
+alter table public.administradores enable row level security;
+
+-- security definer: consulta `administradores` mesmo sem acesso direto a ela.
+create or replace function public.eh_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (select 1 from public.administradores where user_id = auth.uid());
+$$;
+
+revoke execute on function public.eh_admin() from public, anon;
+grant execute on function public.eh_admin() to authenticated;
+
+drop policy if exists "Administradores podem ler pedidos" on public.pedidos;
+create policy "Administradores podem ler pedidos"
+  on public.pedidos for select
+  to authenticated
+  using ((select public.eh_admin()));
+
+drop policy if exists "Administradores podem excluir pedidos" on public.pedidos;
+create policy "Administradores podem excluir pedidos"
+  on public.pedidos for delete
+  to authenticated
+  using ((select public.eh_admin()));
+
+grant select, delete on public.pedidos to authenticated;
