@@ -153,6 +153,7 @@ section + section { margin-top: 28px; }
   cursor: pointer;
 }
 .botao:hover { filter: brightness(1.08); }
+.botao:disabled { opacity: 0.6; cursor: wait; }
 .botao:focus-visible { outline: 3px solid var(--destaque); outline-offset: 2px; }
 .pedido-status { font-size: 0.88rem; font-weight: 600; margin: 10px 0 0; }
 .pedido-status:empty { display: none; }

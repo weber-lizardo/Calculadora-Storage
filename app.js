@@ -183,8 +183,27 @@
     XLSX.writeFile(livro, ARQUIVO_PEDIDOS);
   }
 
+  // Envia o pedido ao fluxo do Power Automate, que acrescenta a linha na planilha do SharePoint.
+  function enviarPedido(pedido) {
+    const botao = document.getElementById("gerar-pedido");
+    botao.disabled = true;
+    status("Enviando pedido…");
+    const linha = Object.fromEntries(colunas().map((c) => [c, pedido[c] ?? ""]));
+    fetch(PEDIDOS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(linha),
+    })
+      .then((r) => {
+        if (!r.ok) throw new Error(r.status);
+        status(`Pedido de ${pedido[COL_LOCAL]} registrado na planilha.`);
+      })
+      .catch(() => status("Não foi possível registrar o pedido na planilha. Tente novamente.", true))
+      .finally(() => { botao.disabled = false; });
+  }
+
   function gerarPedido() {
-    if (typeof XLSX === "undefined") {
+    if (!PEDIDOS_URL && typeof XLSX === "undefined") {
       status("Não foi possível carregar o gerador de planilhas.", true);
       return;
     }
@@ -204,6 +223,8 @@
     pedido[storage.nome] = 1;
     pedido[disco.nome] = calcular(storage, disco).quantidade;
     pedido[COL_DATA] = new Date().toLocaleString("pt-BR");
+
+    if (PEDIDOS_URL) return enviarPedido(pedido);
 
     estado.pedidos.push(pedido);
     salvar(CHAVE_PEDIDOS, estado.pedidos);
@@ -276,5 +297,10 @@
 
   renderizarLocais();
   atualizar();
-  if (estado.pedidos.length) status(totalPedidos());
+  if (PEDIDOS_URL) {
+    // Com a planilha online, o histórico local e a importação não são usados.
+    document.querySelectorAll(".pedido-info, .pedido-acoes").forEach((el) => el.remove());
+  } else if (estado.pedidos.length) {
+    status(totalPedidos());
+  }
 })();

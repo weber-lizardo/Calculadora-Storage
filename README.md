@@ -37,6 +37,43 @@ computador ou navegador, use "Continuar uma planilha existente" e escolha o `.xl
 próximos pedidos são acrescentados a ela. "Limpar pedidos" começa uma planilha nova.
 A geração da planilha usa a biblioteca [SheetJS](https://sheetjs.com/), carregada por CDN.
 
+### Gravar direto na planilha do SharePoint
+
+O site não consegue editar a planilha pelo link de compartilhamento: a API da Microsoft
+sempre exige autenticação. Quem faz a ponte é um fluxo do Power Automate, que roda com a
+conta de quem o criou; os usuários do site não precisam fazer login.
+
+1. **Prepare a planilha.** Na célula A1, cole a linha de cabeçalhos abaixo (separada por
+   tabulação), selecione-a e use **Inserir → Tabela** (marque "Minha tabela tem
+   cabeçalhos"). Em **Design da Tabela**, dê o nome `Pedidos` à tabela.
+
+   ```
+   Local	QNAP TS-433-4G	QNAP TS-435XeU-4G	QNAP TS-1232PXU-RP-4G	SSD Kingston DC600M 7,68 TB	HD Seagate IronWolf Pro 4 TB	HD Seagate IronWolf Pro 8 TB	HD Seagate IronWolf Pro 12 TB	HD Seagate IronWolf Pro 16 TB	HD Seagate IronWolf Pro 20 TB	HD Seagate IronWolf Pro 28 TB	Data
+   ```
+
+2. **Crie o fluxo** em [make.powerautomate.com](https://make.powerautomate.com) → Criar →
+   Fluxo da nuvem instantâneo:
+   - Gatilho **Quando uma solicitação HTTP é recebida** (conector Premium). Em "Quem pode
+     disparar o fluxo", escolha **Qualquer pessoa**. Em "Esquema JSON do corpo da
+     solicitação", use "Usar conteúdo de amostra" e cole:
+
+     ```json
+     {"Local":"AES","QNAP TS-433-4G":1,"QNAP TS-435XeU-4G":"","QNAP TS-1232PXU-RP-4G":"","SSD Kingston DC600M 7,68 TB":"","HD Seagate IronWolf Pro 4 TB":4,"HD Seagate IronWolf Pro 8 TB":"","HD Seagate IronWolf Pro 12 TB":"","HD Seagate IronWolf Pro 16 TB":"","HD Seagate IronWolf Pro 20 TB":"","HD Seagate IronWolf Pro 28 TB":"","Data":"28/09/2026, 10:15:00"}
+     ```
+
+   - Ação **Excel Online (Business) → Adicionar uma linha a uma tabela**: escolha o site
+     SAD-USeB/TI, o arquivo e a tabela `Pedidos`, e preencha cada coluna com o campo de
+     mesmo nome do gatilho.
+   - Ação **Resposta** com código de status `200`.
+
+3. **Salve o fluxo**, copie a URL gerada no gatilho HTTP e coloque em `PEDIDOS_URL`, no
+   `data.js`.
+
+Com `PEDIDOS_URL` preenchido, cada clique em "Gerar pedido do orçamento" acrescenta uma
+linha na planilha do SharePoint. Com `PEDIDOS_URL` vazio, o site volta a baixar o
+`pedidos-orcamento.xlsx` localmente. A URL do fluxo fica visível no código do site: quem
+a tiver consegue inserir linhas, mas não consegue ler nem apagar a planilha.
+
 ## Preços
 
 Os preços em `data.js` são **valores de referência**. Confira o preço atual no link

@@ -3,6 +3,10 @@
 // confira o valor atualizado no link de cada produto antes de fechar a compra.
 // `imagem` aponta para a foto do produto em img/.
 
+// Endereço do fluxo do Power Automate que acrescenta cada pedido na planilha do SharePoint
+// (gatilho "Quando uma solicitação HTTP é recebida"). Vazio: o site baixa a planilha localmente.
+const PEDIDOS_URL = "";
+
 // Locais que podem pedir o orçamento, em ordem alfabética.
 const LOCAIS = [
   "USeB", "ADRA-ES", "ADRA-RJ", "ADRA-MG", "AES", "ASES", "EDESSA", "IPAE", "FADMINAS",
@@ -128,5 +132,5 @@ function calcular(storage, disco, precoStorage = storage.preco, precoDisco = dis
 }
 
 if (typeof module !== "undefined") {
-  module.exports = { LOCAIS, STORAGES, DISCOS, calcular };
+  module.exports = { PEDIDOS_URL, LOCAIS, STORAGES, DISCOS, calcular };
 }
