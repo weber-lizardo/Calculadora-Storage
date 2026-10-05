@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Calculadora de Storage</title>
-  <meta name="description" content="Calcule o custo de aquisição de uma storage QNAP com discos e a capacidade útil em RAID 5 ou RAID 6." />
+  <meta name="description" content="Calcule o custo de aquisição de uma storage QNAP com discos e a capacidade útil em RAID 5, RAID 6 ou RAID 1." />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -33,6 +33,12 @@
         <h2 id="t-disco"><span class="num">3</span> Escolha o disco</h2>
         <p class="dica" id="dica-disco">O disco escolhido é multiplicado pela quantidade de baias da storage.</p>
         <div id="lista-discos" class="grade" role="radiogroup" aria-labelledby="t-disco"></div>
+      </section>
+
+      <section id="secao-acessorios" aria-labelledby="t-acessorios" hidden>
+        <h2 id="t-acessorios"><span class="num">4</span> Acessórios da storage</h2>
+        <p class="dica">Itens recomendados para a storage escolhida. Os marcados como "incluído" entram sempre no orçamento.</p>
+        <div id="lista-acessorios" class="grade"></div>
       </section>
 
       <p class="aviso">

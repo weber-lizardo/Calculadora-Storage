@@ -13,6 +13,7 @@ create table if not exists public.pedidos (
   -- Storages
   ts_433          integer check (ts_433 >= 0),          -- QNAP TS-433-4G
   ts_435xeu       integer check (ts_435xeu >= 0),       -- QNAP TS-435XeU-4G
+  ts_673a         integer check (ts_673a >= 0),         -- QNAP TS-673A-8G
   ts_1232pxu_rp   integer check (ts_1232pxu_rp >= 0),   -- QNAP TS-1232PXU-RP-4G
 
   -- Discos
@@ -22,8 +23,17 @@ create table if not exists public.pedidos (
   st12000nt001    integer check (st12000nt001 >= 0),    -- HD Seagate IronWolf Pro 12 TB
   st16000nt001    integer check (st16000nt001 >= 0),    -- HD Seagate IronWolf Pro 16 TB
   st20000nt001    integer check (st20000nt001 >= 0),    -- HD Seagate IronWolf Pro 20 TB
-  st28000nt000    integer check (st28000nt000 >= 0)     -- HD Seagate IronWolf Pro 28 TB
+  st28000nt000    integer check (st28000nt000 >= 0),    -- HD Seagate IronWolf Pro 28 TB
+
+  -- Acessórios
+  ssd_kc3000_2048 integer check (ssd_kc3000_2048 >= 0), -- SSD Kingston KC3000 2 TB (cache)
+  rks_02          integer check (rks_02 >= 0)           -- Kit trilho Synology RKS-02
 );
+
+-- Tabela criada antes destes itens: adiciona as colunas novas.
+alter table public.pedidos add column if not exists ts_673a integer check (ts_673a >= 0);
+alter table public.pedidos add column if not exists ssd_kc3000_2048 integer check (ssd_kc3000_2048 >= 0);
+alter table public.pedidos add column if not exists rks_02 integer check (rks_02 >= 0);
 
 -- O site usa a chave pública "anon". Com RLS ativo e só esta política, visitantes podem
 -- inserir pedidos, mas não podem ler, alterar nem apagar os existentes.

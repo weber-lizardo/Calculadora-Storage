@@ -8,21 +8,30 @@ e a capacidade útil após configurar o RAID.
 Abra `index.html` no navegador (não precisa de servidor nem de build).
 
 1. Escolha o local do orçamento (lista em ordem alfabética, definida em `LOCAIS` no `data.js`).
-2. Escolha a storage: TS-433-4G, TS-435XeU-4G ou TS-1232PXU-RP-4G.
+2. Escolha a storage: TS-433-4G, TS-435XeU-4G, TS-673A-8G ou TS-1232PXU-RP-4G.
 3. Escolha o disco: SSD Kingston DC600M 7,68 TB ou HD Seagate IronWolf Pro de 4, 8, 12, 16, 20 ou 28 TB.
-4. O resumo mostra:
-   - o custo total: storage + (preço do disco × número de baias);
+   A quantidade começa em um disco por baia e pode ser alterada em cada opção (de 1 até o
+   número de baias).
+4. Acessórios da storage (`ACESSORIOS` no `data.js`):
+   - TS-673A-8G: opção de 2 SSDs Kingston KC3000 2 TB (M.2 NVMe) em RAID 1 para cache.
+     Ficam nos slots M.2 e não fazem parte do RAID das baias;
+   - TS-435XeU-4G e TS-1232PXU-RP-4G: kit trilho RKS-02, incluído automaticamente.
+5. O resumo mostra:
+   - o custo total: storage + (preço do disco × quantidade) + acessórios;
    - a capacidade bruta e a útil:
-     - storages de 4 baias usam **RAID 5**: útil = (4 − 1) × capacidade do disco;
-     - a storage de 12 baias usa **RAID 6**: útil = (12 − 2) × capacidade do disco;
+     - storages de 4 e 6 baias usam **RAID 5**: útil = (discos − 1) × capacidade do disco;
+     - a storage de 12 baias usa **RAID 6**: útil = (discos − 2) × capacidade do disco;
+     - se a quantidade não permitir o RAID da storage (RAID 5 precisa de 3 discos e RAID 6
+       de 4), o resumo avisa e sugere **RAID 1** (2 discos espelhados; um 3º disco fica
+       como hot spare). Com 1 disco não há RAID;
    - o aproveitamento e o custo por TB útil.
-5. Clique em **Gerar pedido do orçamento**.
+6. Clique em **Gerar pedido do orçamento**.
 
 ## Pedidos do orçamento (Supabase)
 
 Cada clique em "Gerar pedido do orçamento" grava uma linha na tabela `pedidos` de um
 projeto [Supabase](https://supabase.com): o local escolhido e, em cada coluna de item, a
-quantidade pedida (1 storage e um disco por baia).
+quantidade pedida (1 storage, os discos e os acessórios).
 
 | criado_em | local | ts_433 | … | st8000nt001 | … |
 |-----------|-------|--------|---|-------------|---|
@@ -51,6 +60,9 @@ só quem entra com um usuário do Supabase Auth cadastrado em `administradores` 
 ler ou apagar pedidos. Para configurar, siga os passos no fim de [`supabase.sql`](supabase.sql)
 (criar o usuário, desativar novos cadastros e cadastrar o administrador).
 
+Quem já tinha criado a tabela pode rodar `supabase.sql` de novo: ele adiciona as colunas
+novas (`ts_673a`, `ssd_kc3000_2048`, `rks_02`) sem apagar os pedidos.
+
 **Ao adicionar um produto em `data.js`**, crie também a coluna dele na tabela, por exemplo:
 
 ```sql
@@ -66,7 +78,8 @@ de `data.js`. Para mudar o padrão para todos, edite o campo `preco` em `data.js
 
 ## Imagens
 
-As fotos das storages ficam em `img/` (`ts-433.jpg`, `ts-435xeu.jpg`, `ts-1232pxu-rp.jpg`).
+As fotos das storages ficam em `img/` (`ts-433.jpg`, `ts-435xeu.jpg`, `ts-673a.jpg`,
+`ts-1232pxu-rp.jpg`).
 Para trocar uma foto, substitua o arquivo ou altere o campo `imagem` do item em `data.js`.
 
 ## Publicação
