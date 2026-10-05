@@ -3,7 +3,7 @@
   const CHAVE_SESSAO = "calculadora-storage:admin-sessao";
 
   const dataHora = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" });
-  const ITENS = [...STORAGES, ...DISCOS];
+  const ITENS = [...STORAGES, ...DISCOS, ...ACESSORIOS];
 
   const el = (id) => document.getElementById(id);
   let sessao = carregarSessao();
