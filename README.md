@@ -78,9 +78,8 @@ de `data.js`. Para mudar o padrão para todos, edite o campo `preco` em `data.js
 
 ## Imagens
 
-As fotos das storages ficam em `img/` (`ts-433.jpg`, `ts-435xeu.jpg`, `ts-1232pxu-rp.jpg`).
-A TS-673A-8G ainda não tem foto: salve-a como `img/ts-673a.jpg` e adicione
-`imagem: "img/ts-673a.jpg"` ao item em `data.js`.
+As fotos das storages ficam em `img/` (`ts-433.jpg`, `ts-435xeu.jpg`, `ts-673a.jpg`,
+`ts-1232pxu-rp.jpg`).
 Para trocar uma foto, substitua o arquivo ou altere o campo `imagem` do item em `data.js`.
 
 ## Publicação

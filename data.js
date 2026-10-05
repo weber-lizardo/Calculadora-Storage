@@ -42,6 +42,7 @@ const STORAGES = [
   },
   {
     id: "ts-673a",
+    imagem: "img/ts-673a.jpg",
     nome: "QNAP TS-673A-8G",
     descricao: "Desktop · 6 baias · AMD Ryzen V1500B · 8 GB DDR4 · 2x M.2 NVMe · 2x 2,5GbE · 2x PCIe x8",
     baias: 6,
