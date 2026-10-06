@@ -9,11 +9,16 @@ Abra `index.html` no navegador (não precisa de servidor nem de build).
 
 1. Escolha o local do orçamento (lista em ordem alfabética, definida em `LOCAIS` no `data.js`).
 2. Escolha a storage: TS-433-4G, TS-435XeU-4G, TS-673A-8G ou TS-1232PXU-RP-4G.
+   Para comprar somente os discos, escolha **Sem Storage**: a quantidade de discos fica
+   livre (sem limite de baias), não há cálculo de RAID e nenhum acessório é oferecido
+   (o SSD KC3000 só é vendido junto com a TS-673A-8G). O pedido grava apenas os discos.
 3. Escolha o disco: SSD Kingston DC600M 7,68 TB ou HD Seagate IronWolf Pro de 4, 8, 12, 16, 20 ou 28 TB.
    A quantidade começa em um disco por baia e pode ser alterada em cada opção (de 1 até o
    número de baias).
 4. Acessórios da storage (`ACESSORIOS` no `data.js`):
-   - TS-673A-8G: opção de 2 SSDs Kingston KC3000 2 TB (M.2 NVMe) em RAID 1 para cache.
+   - TS-673A-8G: opção de SSDs Kingston KC3000 2 TB (M.2 NVMe) em RAID 1 para cache.
+     A quantidade começa em 2 e pode ser ajustada de 1 a 2 (slots M.2). Com 1 unidade não
+     é possível montar o RAID 1, e a página avisa que o cache fica sem proteção.
      Ficam nos slots M.2 e não fazem parte do RAID das baias;
    - TS-435XeU-4G e TS-1232PXU-RP-4G: kit trilho RKS-02, incluído automaticamente.
 5. O resumo mostra:

@@ -66,6 +66,18 @@ const STORAGES = [
   },
 ];
 
+// Opção para comprar somente os discos (reposição ou expansão de uma storage existente).
+// Não tem coluna própria na tabela `pedidos`, não limita a quantidade de discos e não
+// oferece acessórios (o SSD KC3000 só é vendido junto com a TS-673A-8G).
+const SEM_STORAGE = {
+  id: "sem-storage",
+  nome: "Sem Storage",
+  descricao: "Somente os discos, sem a storage. A quantidade de discos é livre.",
+  semStorage: true,
+  baias: null,
+  preco: 0,
+};
+
 const DISCOS = [
   {
     id: "ssd-dc600m-7680",
@@ -132,9 +144,10 @@ const ACESSORIOS = [
     id: "ssd-kc3000-2048",
     nome: "SSD Kingston KC3000 2 TB",
     descricao: "SKC3000D/2048G · M.2 2280 · PCIe 4.0 NVMe · 7.000 MB/s",
-    quantidade: 2,
+    quantidade: 2, // padrão: 2 unidades em RAID 1
+    maximo: 2, // slots M.2 da TS-673A-8G; a quantidade pode ir de 1 até aqui
     opcional: true,
-    cacheTB: 2, // 2 unidades em RAID 1 = 2 TB de cache
+    cacheTB: 2, // capacidade de uma unidade: 2 em RAID 1 (espelho) = 2 TB de cache
     funcao: "Cache SSD em RAID 1 nos slots M.2. Não faz parte do RAID das baias de disco.",
     preco: 3349.99,
     url: "https://www.waz.com.br/ssd-m-2-2280-pcie-4-0-nvme-2tb-kingston-kc3000-7000mb-s-skc3000d-2048g-133894-html/p",
@@ -155,9 +168,19 @@ function acessoriosDe(storage) {
   return (storage.acessorios || []).map((id) => ACESSORIOS.find((a) => a.id === id));
 }
 
+// Aviso do cache SSD: o RAID 1 precisa de 2 unidades espelhadas.
+function avisoCache(acessorio, quantidade) {
+  if (!acessorio.cacheTB || quantidade >= 2) return "";
+  return `Com ${quantidade} ${acessorio.nome} não é possível montar o RAID 1 (mínimo de 2 unidades). ` +
+    `O cache fica sem proteção: se o SSD falhar, o cache é perdido.`;
+}
+
 // RAID usado com `quantidade` discos. RAID 5 exige 3 discos e RAID 6 exige 4; abaixo disso
 // a sugestão é RAID 1 (espelho de 2 discos; um 3º disco fica como hot spare).
 function raidPara(storage, quantidade) {
+  if (storage.semStorage) {
+    return { raid: "Sem RAID", discosDados: quantidade, falhas: 0, hotSpare: 0, aviso: "" };
+  }
   const minimo = storage.discosParidade + 2;
   if (quantidade >= minimo) {
     return { raid: storage.raid, discosDados: quantidade - storage.discosParidade,
@@ -205,5 +228,8 @@ function calcular(storage, disco, opcoes = {}) {
 }
 
 if (typeof module !== "undefined") {
-  module.exports = { SUPABASE_URL, SUPABASE_KEY, LOCAIS, STORAGES, DISCOS, ACESSORIOS, acessoriosDe, raidPara, calcular };
+  module.exports = {
+    SUPABASE_URL, SUPABASE_KEY, LOCAIS, STORAGES, SEM_STORAGE, DISCOS, ACESSORIOS,
+    acessoriosDe, avisoCache, raidPara, calcular,
+  };
 }

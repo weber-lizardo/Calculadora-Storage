@@ -10,6 +10,7 @@
     storageId: null,
     discoId: null,
     quantidades: {}, // discoId -> quantidade escolhida (padrão: uma por baia)
+    qtdAcessorios: {}, // acessórioId -> quantidade escolhida (padrão: a do catálogo)
     opcionais: new Set(), // acessórios opcionais marcados
     precos: carregarPrecos(),
   };
@@ -36,18 +37,43 @@
   }
 
   function storageAtual() {
+    if (estado.storageId === SEM_STORAGE.id) return SEM_STORAGE;
     return STORAGES.find((s) => s.id === estado.storageId);
+  }
+
+  // Sem storage não há baias: a quantidade é livre e começa em 1.
+  function maximoDiscos(storage) {
+    return storage.baias || Infinity;
   }
 
   function quantidadeDe(disco, storage) {
     const q = estado.quantidades[disco.id];
-    return Number.isInteger(q) && q >= 1 && q <= storage.baias ? q : storage.baias;
+    return Number.isInteger(q) && q >= 1 && q <= maximoDiscos(storage) ? q : storage.baias || 1;
+  }
+
+  function quantidadeAcessorio(a) {
+    const q = estado.qtdAcessorios[a.id];
+    return a.maximo && Number.isInteger(q) && q >= 1 && q <= a.maximo ? q : a.quantidade;
   }
 
   function acessoriosEscolhidos(storage) {
     return acessoriosDe(storage)
       .filter((a) => !a.opcional || estado.opcionais.has(a.id))
-      .map((a) => ({ item: a, quantidade: a.quantidade, preco: precoDe(a) }));
+      .map((a) => ({ item: a, quantidade: quantidadeAcessorio(a), preco: precoDe(a) }));
+  }
+
+  function controleQuantidadeAcessorio(a) {
+    if (!a.maximo) return "";
+    const q = quantidadeAcessorio(a);
+    const aviso = avisoCache(a, q);
+    return `
+      <span class="qtd-linha">
+        <span class="rotulo">Quantidade</span>
+        <input type="number" class="qtd-acessorio" min="1" max="${a.maximo}" step="1" inputmode="numeric"
+               value="${q}" data-id="${a.id}" aria-label="Quantidade de ${a.nome}" />
+        <span class="rotulo">de ${a.maximo} slots</span>
+      </span>
+      ${aviso ? `<span class="alerta">${aviso}</span>` : ""}`;
   }
 
   function controleQuantidade(disco, storage) {
@@ -57,10 +83,10 @@
     return `
       <span class="qtd-linha">
         <span class="rotulo">Quantidade</span>
-        <input type="number" class="qtd" min="1" max="${storage.baias}" step="1" inputmode="numeric"
-               value="${quantidadeDe(disco, storage)}" data-id="${disco.id}"
+        <input type="number" class="qtd" min="1" ${storage.baias ? `max="${storage.baias}"` : ""} step="1"
+               inputmode="numeric" value="${quantidadeDe(disco, storage)}" data-id="${disco.id}"
                aria-label="Quantidade de ${disco.nome}" />
-        <span class="rotulo">de ${storage.baias} baias</span>
+        <span class="rotulo">${storage.baias ? `de ${storage.baias} baias` : "sem limite"}</span>
       </span>`;
   }
 
@@ -87,13 +113,28 @@
     return el;
   }
 
+  function cartaoSemStorage(selecionado) {
+    const el = document.createElement("label");
+    el.className = "cartao" + (selecionado ? " ativo" : "");
+    el.innerHTML = `
+      <input type="radio" name="storage" value="${SEM_STORAGE.id}" ${selecionado ? "checked" : ""} />
+      <span class="cartao-topo">
+        <strong>${SEM_STORAGE.nome}</strong>
+        <span class="selo">somente discos</span>
+      </span>
+      <span class="desc">${SEM_STORAGE.descricao}</span>
+    `;
+    return el;
+  }
+
   function renderizarListas() {
     const listaS = document.getElementById("lista-storages");
     const listaD = document.getElementById("lista-discos");
     listaS.replaceChildren(
       ...STORAGES.map((s) =>
         cartao(s, "storage", s.id === estado.storageId, `${s.baias} baias · ${s.raid}`)
-      )
+      ),
+      cartaoSemStorage(estado.storageId === SEM_STORAGE.id)
     );
     const storage = storageAtual();
     listaD.replaceChildren(
@@ -103,7 +144,9 @@
       )
     );
 
-    document.getElementById("dica-disco").textContent = storage
+    document.getElementById("dica-disco").textContent = storage?.semStorage
+      ? "Sem storage: escolha o disco e a quantidade desejada, sem limite de baias."
+      : storage
       ? `Por padrão, uma unidade por baia da ${storage.nome} (${storage.baias}). ` +
         `Ajuste a quantidade em cada disco.`
       : "Por padrão, uma unidade por baia da storage. A quantidade pode ser ajustada em cada disco.";
@@ -113,9 +156,10 @@
     document.getElementById("lista-acessorios").replaceChildren(
       ...acessorios.map((a) => {
         const marcado = !a.opcional || estado.opcionais.has(a.id);
+        const q = quantidadeAcessorio(a);
         const el = cartao(a, "acessorio", marcado,
-          `${a.quantidade} ${a.quantidade > 1 ? "unidades" : "unidade"} · ${a.opcional ? "opcional" : "incluído"}`,
-          `<span class="funcao">${a.funcao}</span>`, "checkbox");
+          `${q} ${q > 1 ? "unidades" : "unidade"} · ${a.opcional ? "opcional" : "incluído"}`,
+          `<span class="funcao">${a.funcao}</span>${controleQuantidadeAcessorio(a)}`, "checkbox");
         if (!a.opcional) {
           el.classList.add("fixo");
           el.querySelector('input[type="checkbox"]').disabled = true;
@@ -151,7 +195,32 @@
       acessorios,
     });
     const discos = (n) => `${n} ${n > 1 ? "discos" : "disco"}`;
+
+    if (storage.semStorage) {
+      alvo.innerHTML = `
+        <h3>Custo de aquisição</h3>
+        <dl>
+          ${linha(`${r.quantidade} × ${disco.nome}`, moeda.format(r.custoDiscos))}
+          <div class="sub">${r.quantidade} × ${moeda.format(precoD)}</div>
+          ${linha("Total", moeda.format(r.custoTotal), "total")}
+        </dl>
+
+        <h3>Armazenamento</h3>
+        <dl>
+          ${linha("Capacidade bruta", `${numero.format(r.brutoTB)} TB`, "total")}
+          <div class="sub">≈ ${numero.format(r.utilTiB)} TiB exibidos pelo sistema</div>
+          ${linha("Custo por TB", moeda.format(r.custoPorTB))}
+        </dl>
+        <p class="formula">
+          Sem storage: compra somente de ${discos(r.quantidade)}. A capacidade útil depende do
+          RAID da storage em que forem instalados.
+        </p>
+      `;
+      return;
+    }
+
     const cache = acessorios.find((a) => a.item.cacheTB);
+    const avisoSsd = cache ? avisoCache(cache.item, cache.quantidade) : "";
     const livres = storage.baias - r.quantidade;
 
     let formula;
@@ -196,9 +265,12 @@
         <div class="sub">≈ ${numero.format(r.utilTiB)} TiB exibidos pelo sistema</div>
         ${linha("Aproveitamento", pct.format(r.eficiencia))}
         ${linha("Custo por TB útil", moeda.format(r.custoPorTB))}
-        ${cache ? linha("Cache SSD (RAID 1)", `${numero.format(cache.item.cacheTB)} TB`) : ""}
+        ${cache
+          ? linha(`Cache SSD (${cache.quantidade >= 2 ? "RAID 1" : "sem RAID"})`, `${numero.format(cache.item.cacheTB)} TB`)
+          : ""}
         ${cache ? `<div class="sub">Nos slots M.2; não entra na capacidade útil nem no RAID das baias.</div>` : ""}
       </dl>
+      ${avisoSsd ? `<p class="alerta" role="alert">${avisoSsd}</p>` : ""}
       <p class="formula">
         ${formula}
         ${livres > 0 ? `<br />${livres} ${livres > 1 ? "baias livres" : "baia livre"} para expansão futura.` : ""}
@@ -245,11 +317,9 @@
     const botao = document.getElementById("gerar-pedido");
     botao.disabled = true;
     status("Enviando pedido…");
-    const pedido = {
-      local: estado.local,
-      [colunaBanco(storage)]: 1,
-      [colunaBanco(disco)]: quantidadeDe(disco, storage),
-    };
+    const pedido = { local: estado.local };
+    if (!storage.semStorage) pedido[colunaBanco(storage)] = 1;
+    pedido[colunaBanco(disco)] = quantidadeDe(disco, storage);
     for (const a of acessoriosEscolhidos(storage)) pedido[colunaBanco(a.item)] = a.quantidade;
     fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
       method: "POST",
@@ -287,8 +357,16 @@
       // Ao sair do campo, corrige valores fora do intervalo e escolhe o disco.
       const storage = storageAtual();
       const q = Math.round(parseFloat(t.value));
-      estado.quantidades[t.dataset.id] = Number.isFinite(q) ? Math.min(Math.max(q, 1), storage.baias) : storage.baias;
+      estado.quantidades[t.dataset.id] = Number.isFinite(q)
+        ? Math.min(Math.max(q, 1), maximoDiscos(storage))
+        : storage.baias || 1;
       estado.discoId = t.dataset.id;
+    } else if (t.classList.contains("qtd-acessorio")) {
+      // Mesmo comportamento para o acessório: corrige o valor e marca o item.
+      const a = ACESSORIOS.find((x) => x.id === t.dataset.id);
+      const q = Math.round(parseFloat(t.value));
+      estado.qtdAcessorios[a.id] = Number.isFinite(q) ? Math.min(Math.max(q, 1), a.maximo) : a.quantidade;
+      if (a.opcional) estado.opcionais.add(a.id);
     } else return;
     atualizar();
   });
@@ -297,8 +375,17 @@
     const t = ev.target;
     if (t.classList.contains("qtd")) {
       const q = Number(t.value);
-      if (Number.isInteger(q) && q >= 1 && q <= storageAtual().baias) {
+      if (Number.isInteger(q) && q >= 1 && q <= maximoDiscos(storageAtual())) {
         estado.quantidades[t.dataset.id] = q;
+        renderizarResumo();
+      }
+      return;
+    }
+    if (t.classList.contains("qtd-acessorio")) {
+      const a = ACESSORIOS.find((x) => x.id === t.dataset.id);
+      const q = Number(t.value);
+      if (Number.isInteger(q) && q >= 1 && q <= a.maximo) {
+        estado.qtdAcessorios[a.id] = q;
         renderizarResumo();
       }
       return;
