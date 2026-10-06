@@ -110,7 +110,7 @@ section + section { margin-top: 28px; }
 }
 .qtd-linha { display: flex; align-items: center; gap: 8px; }
 .qtd-linha .rotulo { white-space: nowrap; }
-.qtd {
+.qtd, .qtd-acessorio {
   width: 64px;
   font: inherit; font-weight: 600;
   padding: 6px 8px;
